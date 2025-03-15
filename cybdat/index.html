@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hjemside</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+    <button id="mode-toggle">☾</button>
+    <div id="timetable">
+        <h3 id="timetable-header"></h3>
+        <div id="timetable-content"></div>
+        <div id="timetable-buttons">
+            <button id="prev-day">Forrige dag</button>
+            <button id="next-day">Neste dag</button>
+        </div>
+    </div>
+    <ul>
+        <li><a href="https://wiki.math.ntnu.no/tma4115/2025v/start">TMA4115</a></li>
+        <li><a href="https://www.ntnu.no/wiki/display/tdt4100">TDT4100</a></li>
+        <li><a href="https://stovneng.folk.ntnu.no/TFY4125_2025/tfy4125.htm">TFY4125</a></li>
+        <li><a href="http://home.phys.ntnu.no/brukdef/undervisning/fyslab">Physics Lab</a></li>
+        <li><a href="https://fsweb.no/studentweb/login.jsf?inst=FSNTNU">Student Web</a></li>
+        <li><a href="https://abakus.no/">Abakus</a></li>
+        <li><a href="https://ovsys.math.ntnu.no/">OVSYS</a></li>
+    </ul>
+    <footer>
+        Av Mohand &copy; 2025
+    </footer>
+    <script src="../cookies.js"></script>
+    <script src="../darkmode.js"></script>
+    <script src="timetable.js"></script>
+    <script>
+        window.onload = function() {
+            checkMode();
+            fetchTimetable(currentDate);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logg inn</title>
+    <link rel="stylesheet" href="../stiler/loggInnStil.css">
+</head>
+<body>
+        
+    <main class="main">
+        <div class="container">
+            <section class="wrapper">
+                <div class="heading">
+
+                    <h1 class="text text-large">Logg Inn</h1>
+                    <p class="text text-normal">Ny bruker? <span><a href="nyBruker.html" class="nyBruker">Lag en ny bruker</a></span>
+
+                    </p>
+                </div>
+                
+                <div class="form">
+
+                    <div class="input-control">
+                        <label for="epost" class="input-label" hidden>Epost Addresse</label>
+                        <input type="email" id="epost" class="input-field" placeholder="Epost Adresse" required autocomplete="off">
+                    </div>
+
+                    <div class="input-control">
+                        <label for="passord" class="input-label" hidden>Passord</label>
+                        <input type="password" id="passord" class="input-field" placeholder="Passord" required autocomplete="off">
+                    </div>
+
+                    <div class="input-control">
+                        <a href="glemtPassord.html" id="glemtPassord" class="tekst-lenker">Glemt Passord</a>
+                        <input type="submit" id="loggInnKnapp" class="knapp" value="Logg Inn">
+                    </div>
+
+                </div>
+
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+    const loggInnKnapp = document.querySelector('#loggInnKnapp');
+    loggInnKnapp.addEventListener("click", async (e) => {
+        e.preventDefault();
+        try {
+            let epost = document.querySelector("#epost").value;
+            let passord = document.querySelector("#passord").value;
+            
+            if (!epost || !passord) {
+                throw new Error("Please fill in all fields");
+            }
+
+            let res = await fetch("../api/auth.php?action=login", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ epost, passord })
+            });
+            
+            if (!res.ok) {
+                let error = await res.text();
+                throw new Error(error);
+            }
+            
+            window.location = "../index.html";
+        } catch (error) {
+            console.error(error);
+            alert("Login failed: " + error.message);
+        }
+    });
+</script>
+</body>
+</html>
