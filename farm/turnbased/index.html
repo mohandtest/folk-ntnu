@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Battle Arena</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #000; 
+            font-family: Arial, sans-serif;
+        }
+        canvas { display: block; }
+        .loading-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+        }
+        .battle-ui {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-top: 2px solid #444;
+            display: none;
+        }
+        .battle-message {
+            margin-bottom: 10px;
+            font-size: 18px;
+            height: 24px;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .message-highlight {
+            font-weight: bold;
+            color: #FFC107;
+            transform: scale(1.05);
+        }
+        .battle-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .battle-option {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .battle-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .health-bars {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            position: relative;
+            padding-top: 25px;
+        }
+        .health-bar {
+            width: 40%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 3px;
+        }
+        .health-fill {
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+        @keyframes healthDecrease {
+            0% { box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.7); }
+            100% { box-shadow: none; }
+        }
+        .health-decrease {
+            animation: healthDecrease 1s;
+        }
+        .character-select {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+        }
+        .character-options {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .character-option {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .character-option:hover {
+            background-color: #333;
+        }
+        .character-option img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .turn-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .character-info {
+            color: white;
+            padding: 5px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .character-name {
+            font-weight: bold;
+        }
+        .character-type {
+            background-color: #555;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .attack-type.Flying { background-color: #9E9E9E; }
+        .attack-type.Ground { background-color: #8D6E63; }
+        .attack-type.Normal { background-color: #78909C; }
+        .attack-type.Special { background-color: #7E57C2; }
+        .effect-animation {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+    <!-- Three.js libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
+    
+    <!-- Game framework files -->
+    <script src="js/models.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/modelLoader.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/battle.js"></script>
+    <script src="js/game.js"></script>
+</head>
+<body>
+    <div class="loading-text">Loading Game...</div>
+    
+    <div class="character-select" id="characterSelect">
+        <h2>Choose Your Animal</h2>
+        <div class="character-options">
+            <div class="character-option" data-animal="chicken">
+                <img src="images/chicken_icon.png" alt="Chicken">
+                <div>Chicken</div>
+            </div>
+            <div class="character-option" data-animal="cow">
+                <img src="images/cow_icon.png" alt="Cow">
+                <div>Cow</div>
+            </div>
+            <div class="character-option" data-animal="pig">
+                <img src="images/pig_icon.png" alt="Pig">
+                <div>Pig</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="battle-ui" id="battleUI">
+        <div class="health-bars">
+            <div class="health-bar">
+                <div class="health-fill" id="playerHealth" style="width: 100%;"></div>
+            </div>
+            <div class="health-bar">
+                <div class="health-fill" id="enemyHealth" style="width: 100%;"></div>
+            </div>
+        </div>
+        <div class="battle-message" id="battleMessage">What will you do?</div>
+        <div class="battle-options" id="battleOptions">
+            <!-- Move buttons will be generated dynamically -->
+        </div>
+    </div>
+</body>
+</html>
